@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemáticas para la Vida - RED Gamificado (Grado 8°)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tone.js para efectos de sonido gamificados -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .pascal-node {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .pascal-node:hover {
+            transform: scale(1.15);
+            z-index: 10;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .video-canvas {
+            background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%);
+        }
+        .video-viewport {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #090d16;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-center;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Navbar Principal -->
+    <header class="bg-indigo-900 text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white shadow-inner">
+                    <i data-lucide="triangle" class="w-6 h-6 fill-amber-400 stroke-amber-400"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg leading-tight tracking-wide">Matemáticas para la Vida</h1>
+                    <p class="text-xs text-indigo-300">Grado 8° • Proyecto Pedagógico Transversal</p>
+                </div>
+            </div>
+
+            <!-- Panel de Puntuación e Insignias -->
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 bg-indigo-950/60 px-3 py-1.5 rounded-full border border-indigo-700/50">
+                    <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                    <span id="score-display" class="font-bold text-amber-300 text-sm">0 Pts</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-indigo-950/60 px-3 py-1.5 rounded-full border border-indigo-700/50">
+                    <i data-lucide="award" class="w-4 h-4 text-emerald-400"></i>
+                    <span id="badges-count" class="font-bold text-emerald-300 text-sm">0/5 Retos</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <div class="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 gap-6 overflow-hidden">
+
+        <!-- Sidebar NAVEGACIÓN -->
+        <aside class="w-80 flex-shrink-0 hidden md:flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm p-4 overflow-y-auto custom-scrollbar">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Ruta de Aprendizaje</h2>
+            
+            <nav class="space-y-1.5" id="navigation-menu">
+                <!-- Se genera dinámicamente con JS -->
+            </nav>
+
+            <div class="mt-auto pt-4 border-t border-slate-100">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-600">Progreso Total</span>
+                        <span id="progress-percent" class="text-xs font-bold text-indigo-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área Central de Aprendizaje y Juegos -->
+        <main class="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative">
+            <div id="content-container" class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+                <!-- El contenido dinámico de módulos/retos se insertará aquí -->
+            </div>
+
+            <!-- Modal de Feedback Gamificado -->
+            <div id="feedback-modal" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl transform transition-all border border-slate-100 text-center relative overflow-hidden">
+                    <div id="modal-icon-bg" class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                        <i id="modal-icon" class="w-10 h-10"></i>
+                    </div>
+                    <h3 id="modal-title" class="text-2xl font-bold text-slate-800 mb-2"></h3>
+                    <p id="modal-message" class="text-slate-600 mb-6 text-sm leading-relaxed"></p>
+                    <button id="modal-btn" onclick="closeFeedbackModal()" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition">
+                        Continuar
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts del Recurso Educativo -->
+    <script>
+        // Data Estructurada de Módulos, Teoría, Videos Explicativos y Retos
+        const modules = [
+            {
+                id: 'intro',
+                title: '0. Bienvenida & Conceptos',
+                icon: 'compass',
+                type: 'theory',
+                badge: 'Explorador',
+                video: {
+                    title: 'Vídeo Explicativo 1: ¿Qué es el Triángulo de Pascal y para qué sirve?',
+                    duration: '0:45 min',
+                    summary: 'Descubre los orígenes del Triángulo de Pascal, cómo se construye paso a paso y por qué es una de las herramientas de patrones matemáticos más potentes.',
+                    topic: 'Pascal & Patrones',
+                    type: 'pascal-build',
+                    visualGuide: [
+                        'Fila 0: Inicia siempre con el número 1 en la cúspide.',
+                        'Fila 1: Los bordes laterales siempre son 1 (1 - 1).',
+                        'Fila 2: El centro resulta de sumar 1 + 1 = 2 (1 - 2 - 1).',
+                        'Fila 3: Las casillas interiores suman 1+2=3 y 2+1=3 (1 - 3 - 3 - 1).'
+                    ]
+                },
+                content: {
+                    heading: '¡Bienvenido a Matemáticas para la Vida!',
+                    description: 'En este recurso interactivo aprenderás cómo las matemáticas no son solo números en un tablero, sino patrones fascinantes presentes en la naturaleza, el arte y situaciones de la vida cotidiana.',
+                    theoryBlocks: [
+                        {
+                            title: '¿Qué es el Triángulo de Pascal?',
+                            text: 'El Triángulo de Pascal es un arreglo de números en forma de triángulo. Fue nombrado en honor al matemático francés Blaise Pascal. Cada número se obtiene sumando los dos números directamente ubicados sobre él en la fila anterior.',
+                            highlight: 'Propiedad Fundamental: Los bordes exteriores siempre contienen el número 1.'
+                        },
+                        {
+                            title: '¿Por qué es importante en Grado 8°?',
+                            text: 'Nos ayuda a entender secuencias numéricas, desarrollar el pensamiento algebraico (como los coeficientes de productos notables (a+b)ⁿ), calcular probabilidades y resolver problemas de distribución cotidiana.'
+                        }
+                    ],
+                    interactiveDemo: true
+                }
+            },
+            {
+                id: 'reto1',
+                title: '1. Construye el Triángulo',
+                icon: 'grid',
+                type: 'challenge',
+                badge: 'Constructor de Patrones',
+                video: {
+                    title: 'Vídeo Explicativo 2: Paso a Paso para Construir las Filas',
+                    duration: '0:40 min',
+                    summary: 'Aprende mediante una simulación animada cómo realizar las sumas consecutivas entre casillas adyacentes para completar cualquier nivel del triángulo.',
+                    topic: 'Regla de Suma Superior',
+                    type: 'sum-rule',
+                    visualGuide: [
+                        'Casilla central = Casilla Superior Izquierda + Casilla Superior Derecha',
+                        'Ejemplo Fila 3: (1 + 2 = 3) y (2 + 1 = 3)',
+                        'Ejemplo Fila 4: (1 + 3 = 4), (3 + 3 = 6), (3 + 1 = 4)'
+                    ]
+                },
+                theory: {
+                    title: 'Fundamento Teórico: Regla de Suma de Pascal',
+                    text: 'Para hallar cualquier casilla interior del triángulo, debes tomar las dos casillas inmediatamente superiores y sumarlas. Por ejemplo, en la fila 3 tenemos [1, 2, 1]. El número 2 se obtiene sumando 1 + 1.',
+                    formula: 'Casilla = Superior Izquierda + Superior Derecha'
+                },
+                challengeType: 'pascal-fill',
+                questions: [
+                    {
+                        instructions: 'Observa el Triángulo de Pascal e ingresa los números que faltan en los espacios con signo de interrogación (?).',
+                        rowToFill: 4,
+                        inputs: [
+                            { id: 'p1', correct: 4, pos: 'Fila 4, Posición 2 (1 + 3)' },
+                            { id: 'p2', correct: 6, pos: 'Fila 4, Posición 3 (3 + 3)' },
+                            { id: 'p3', correct: 4, pos: 'Fila 4, Posición 4 (3 + 1)' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'reto2',
+                title: '2. Patrones Ocultos',
+                icon: 'search',
+                type: 'challenge',
+                badge: 'Detectivo Matemático',
+                video: {
+                    title: 'Vídeo Explicativo 3: Patrones Ocultos, Diagonales y Potencias de 2',
+                    duration: '0:50 min',
+                    summary: 'Explora en la animación las secuencias mágicas guardadas en el triángulo: números naturales, números triangulares y la suma exponencial de cada fila (2ⁿ).',
+                    topic: 'Diagonales & Exponentes',
+                    type: 'diagonals',
+                    visualGuide: [
+                        'Diagonal 1: Todos son 1 (Constantes)',
+                        'Diagonal 2: 1, 2, 3, 4, 5... (Números Naturales)',
+                        'Diagonal 3: 1, 3, 6, 10, 15... (Números Triangulares)',
+                        'Suma de Filas: 2⁰=1, 2¹=2, 2²=4, 2³=8, 2⁴=16'
+                    ]
+                },
+                theory: {
+                    title: 'Fundamento Teórico: Regularidades en las Diagonales y Sumas',
+                    text: 'El Triángulo de Pascal guarda muchos secretos:\n1. La primera diagonal son solo 1s.\n2. La segunda diagonal contiene los Números Naturales (1, 2, 3, 4, 5...).\n3. La tercera diagonal contiene los Números Triangulares (1, 3, 6, 10...).\n4. La suma de los números de cada fila es siempre una potencia de 2 (2⁰=1, 2¹=2, 2²=4, 2³=8, 2⁴=16...).'
+                },
+                challengeType: 'matching',
+                matchingPairs: [
+                    { id: 1, left: 'Suma de elementos de la Fila 3 (1+3+3+1)', right: '8 (2³)' },
+                    { id: 2, left: 'Segunda diagonal del triángulo', right: 'Números Naturales (1, 2, 3, 4...)' },
+                    { id: 3, left: 'Tercera diagonal del triángulo', right: 'Números Triangulares (1, 3, 6, 10...)' },
+                    { id: 4, left: 'Suma de elementos de la Fila 4 (1+4+6+4+1)', right: '16 (2⁴)' }
+                ]
+            },
+            {
+                id: 'reto3',
+                title: '3. Matemáticas en la Vida',
+                icon: 'shopping-bag',
+                type: 'challenge',
+                badge: 'Resolutor Cotidiano',
+                video: {
+                    title: 'Vídeo Explicativo 4: Aplicaciones Reales y Combinatoria',
+                    duration: '0:45 min',
+                    summary: '¿Cómo nos ayuda el Triángulo de Pascal a tomar decisiones en compras, combinaciones de menú o distribución de objetos cotidianos? ¡Descúbrelo!',
+                    topic: 'Combinaciones en la Vida Real',
+                    type: 'real-life',
+                    visualGuide: [
+                        'Elección de Toppings / Sabores / Menús',
+                        'Organización en pirámides o inventarios',
+                        'Fila 4 (1, 4, 6, 4, 1): Combinar 2 elementos de 4 da 6 formas posibles'
+                    ]
+                },
+                theory: {
+                    title: 'Fundamento Teórico: Aplicación a Problemas Reales',
+                    text: 'El pensamiento matemático nos permite tomar decisiones informadas en compras, organización de eventos y combinaciones. Las secuencias y combinaciones del Triángulo de Pascal nos dicen de cuántas maneras podemos elegir elementos de un grupo.'
+                },
+                challengeType: 'quiz-multiple',
+                quizQuestions: [
+                    {
+                        question: 'Una tienda de helados ofrece 4 toppings diferentes. Quieres saber de cuántas formas distintas puedes elegir exactamente 2 toppings. Usando la Fila 4 del Triángulo de Pascal (1, 4, 6, 4, 1), ¿cuál es la respuesta?',
+                        options: [
+                            '4 formas distintas',
+                            '6 formas distintas',
+                            '8 formas distintas',
+                            '12 formas distintas'
+                        ],
+                        correctIndex: 1,
+                        explanation: '¡Correcto! En la fila 4 (1, 4, 6, 4, 1), la posición que corresponde a elegir 2 elementos de 4 posibles es 6 (Combinatoria ₄C₂ = 6).'
+                    },
+                    {
+                        question: 'Un supermercado empaca cajas de naranjas formando torres piramidales triangulares. La primera capa arriba tiene 1 naranja, la segunda 3, la tercera 6 y la cuarta 10. ¿Qué patrón representan estos números?',
+                        options: [
+                            'Números Primos',
+                            'Potencias de 10',
+                            'Números Triangulares (Diagonal 3 de Pascal)',
+                            'Secuencia Par'
+                        ],
+                        correctIndex: 2,
+                        explanation: '¡Excelente! Los números 1, 3, 6, 10... son los Números Triangulares presentes en la tercera diagonal del Triángulo de Pascal.'
+                    }
+                ]
+            },
+            {
+                id: 'reto4',
+                title: '4. ¿Verdadero o Falso?',
+                icon: 'check-circle-2',
+                type: 'challenge',
+                badge: 'Argumentador Lógico',
+                video: {
+                    title: 'Vídeo Explicativo 5: Binomios de Newton y Demostraciones',
+                    duration: '0:40 min',
+                    summary: 'Repaso sintético sobre cómo argumentar si una afirmación matemática sobre productos notables y secuencias de Pascal es verdadera o falsa.',
+                    topic: 'Álgebra & Demostraciones',
+                    type: 'algebra',
+                    visualGuide: [
+                        'Binomio (a+b)² = 1a² + 2ab + 1b² -> Coeficientes (1, 2, 1)',
+                        'Binomio (a+b)³ = 1a³ + 3a²b + 3ab² + 1b³ -> Coeficientes (1, 3, 3, 1)',
+                        'Verificación lógica basada en reglas algebraicas'
+                    ]
+                },
+                theory: {
+                    title: 'Fundamento Teórico: Razonamiento y Justificación',
+                    text: 'Argumentar en matemáticas consiste en verificar si una afirmación es válida utilizando propiedades lógicas demostradas, en lugar de adivinar.'
+                },
+                challengeType: 'true-false',
+                tfQuestions: [
+                    {
+                        statement: 'La suma de todos los números en cualquier fila "n" del Triángulo de Pascal es igual a una potencia de 2 (2ⁿ).',
+                        isTrue: true,
+                        justification: 'Es Verdadero. Por ejemplo, en la fila 0 la suma es 1 (2⁰), en la fila 1 es 2 (2¹), en la fila 2 es 4 (2²), etc.'
+                    },
+                    {
+                        statement: 'El Triángulo de Pascal solo tiene números impares en todas sus filas.',
+                        isTrue: false,
+                        justification: 'Es Falso. Hay números pares e impares. Por ejemplo, en la Fila 2 tenemos [1, 2, 1] donde el 2 es par. Si coloreamos los impares obtenemos el Fractal de Sierpinski.'
+                    },
+                    {
+                        statement: 'Los coeficientes del desarrollo del binomio (a+b)³ = 1a³ + 3a²b + 3ab² + 1b³ provienen de la Fila 3 del Triángulo de Pascal.',
+                        isTrue: true,
+                        justification: 'Es Verdadero. Los coeficientes algebraicos (1, 3, 3, 1) corresponden exactamente a los valores de la Fila 3.'
+                    }
+                ]
+            },
+            {
+                id: 'reto5',
+                title: '5. Misión Final',
+                icon: 'trophy',
+                type: 'challenge',
+                badge: 'Maestro de las Matemáticas',
+                video: {
+                    title: 'Vídeo Explicativo 6: Estrategias para Superar la Misión Final',
+                    duration: '0:35 min',
+                    summary: 'Orientaciones finales de síntesis para integrar patrones, álgebra, secuencias y lógica en la resolución de problemas de evaluación.',
+                    topic: 'Síntesis & Desafío Integrador',
+                    type: 'final-review',
+                    visualGuide: [
+                        '1. Identificar si el problema solicita sumas, diagonales o posiciones.',
+                        '2. Calcular con precisión sumando casillas superiores.',
+                        '3. Comprobar resultados con potencias de 2 (2ⁿ).'
+                    ]
+                },
+                theory: {
+                    title: 'Gran Desafío Integrador',
+                    text: 'Has llegado a la evaluación final. Aquí integrarás todos los conceptos: construcción de secuencias, identificación de patrones, pensamiento algebraico y aplicaciones prácticas.'
+                },
+                challengeType: 'final-mission',
+                questions: [
+                    {
+                        q: '¿Cuál es el valor del número central en la Fila 6 del Triángulo de Pascal (1, 6, 15, 20, 15, 6, 1)?',
+                        options: ['15', '20', '30', '12'],
+                        correct: 1,
+                        exp: 'El elemento central de la fila 6 es 20.'
+                    },
+                    {
+                        q: 'Si la suma de la Fila 5 es 2⁵ = 32, ¿cuál es la suma de la Fila 6?',
+                        options: ['34', '48', '64', '128'],
+                        correct: 2,
+                        exp: 'Como cada fila duplica a la anterior (2⁶), la suma es 32 × 2 = 64.'
+                    }
+                ]
+            }
+        ];
+
+        // Estado Global de la App
+        let state = {
+            currentModuleIndex: 0,
+            score: 0,
+            completedModules: new Set(),
+            userAnswers: {},
+            isVideoPlaying: false,
+            videoTimer: null,
+            videoStep: 0
+        };
+
+        // Sintetizador de Sonidos Gamificados (Tone.js)
+        function playSound(type) {
+            try {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                const synth = new Tone.Synth().toDestination();
+                if (type === 'correct') {
+                    synth.triggerAttackRelease("C5", "8n");
+                    setTimeout(() => synth.triggerAttackRelease("E5", "8n"), 100);
+                    setTimeout(() => synth.triggerAttackRelease("G5", "8n"), 200);
+                } else if (type === 'incorrect') {
+                    synth.triggerAttackRelease("G3", "8n");
+                    setTimeout(() => synth.triggerAttackRelease("C3", "4n"), 120);
+                } else if (type === 'badge') {
+                    synth.triggerAttackRelease("C4", "8n");
+                    setTimeout(() => synth.triggerAttackRelease("G4", "8n"), 100);
+                    setTimeout(() => synth.triggerAttackRelease("C5", "4n"), 200);
+                }
+            } catch (e) {
+                console.log('Audio disabled or blocked');
+            }
+        }
+
+        // Inicializar Aplicación al Cargar
+        window.onload = function() {
+            renderSidebar();
+            loadModule(0);
+            updateUIStats();
+        };
+
+        // Renderizar Menú Lateral
+        function renderSidebar() {
+            const nav = document.getElementById('navigation-menu');
+            nav.innerHTML = modules.map((mod, idx) => {
+                const isCompleted = state.completedModules.has(mod.id);
+                const isActive = state.currentModuleIndex === idx;
+                
+                let btnClasses = "w-full flex items-center justify-between px-3 py-3 rounded-xl font-medium text-sm transition-all ";
+                if (isActive) {
+                    btnClasses += "bg-indigo-50 text-indigo-700 border border-indigo-200/60 shadow-sm";
+                } else if (isCompleted) {
+                    btnClasses += "text-slate-700 hover:bg-slate-100/80";
+                } else {
+                    btnClasses += "text-slate-500 hover:bg-slate-50";
+                }
+
+                return `
+                    <button onclick="switchModule(${idx})" class="${btnClasses}">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-1.5 rounded-lg ${isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'}">
+                                <i data-lucide="${mod.icon}" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-left font-semibold">${mod.title}</span>
+                        </div>
+                        ${isCompleted ? '<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>' : ''}
+                    </button>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function switchModule(idx) {
+            stopInteractiveVideo();
+            state.currentModuleIndex = idx;
+            renderSidebar();
+            loadModule(idx);
+        }
+
+        // Cargar Módulo Seleccionado
+        function loadModule(idx) {
+            const mod = modules[idx];
+            const container = document.getElementById('content-container');
+            
+            let html = `
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <!-- Banner Encabezado -->
+                    <div class="bg-gradient-to-r from-indigo-900 to-indigo-700 text-white rounded-2xl p-6 md:p-8 shadow-lg relative overflow-hidden">
+                        <div class="absolute -right-6 -bottom-6 opacity-10">
+                            <i data-lucide="${mod.icon}" class="w-48 h-48"></i>
+                        </div>
+                        <div class="relative z-10">
+                            <span class="px-3 py-1 bg-indigo-500/30 border border-indigo-400/30 rounded-full text-xs font-semibold text-indigo-200 uppercase tracking-wider">
+                                ${mod.type === 'theory' ? 'Módulo Teórico & Interactivo' : 'Desafío Gamificado'}
+                            </span>
+                            <h2 class="text-2xl md:text-3xl font-extrabold mt-3">${mod.title}</h2>
+                            <p class="text-indigo-200 text-sm mt-1">Insignia del Módulo: <span class="font-bold text-amber-300">${mod.badge}</span></p>
+                        </div>
+                    </div>
+            `;
+
+            // Teórica previa del Módulo
+            if (mod.content) {
+                html += `
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                        <h3 class="text-xl font-extrabold text-slate-800">${mod.content.heading}</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">${mod.content.description}</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            ${mod.content.theoryBlocks.map(b => `
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <h4 class="font-bold text-indigo-900 text-sm mb-1">${b.title}</h4>
+                                    <p class="text-slate-600 text-xs leading-relaxed mb-2">${b.text}</p>
+                                    ${b.highlight ? `<span class="inline-block text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-md">${b.highlight}</span>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (mod.theory) {
+                html += `
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-3">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                            <i data-lucide="book-open" class="w-5 h-5 text-indigo-600"></i>
+                            <span>${mod.theory.title}</span>
+                        </h3>
+                        <p class="text-slate-600 text-sm leading-relaxed whitespace-pre-line">${mod.theory.text}</p>
+                        ${mod.theory.formula ? `
+                            <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-xl text-center font-bold text-indigo-900 text-sm">
+                                ${mod.theory.formula}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            // Reproductor Animado Autónomo en Canvas/HTML Integrado
+            if (mod.video) {
+                html += `
+                    <div class="bg-indigo-950 text-white rounded-2xl p-5 md:p-6 shadow-md border border-indigo-900">
+                        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-rose-600 text-white text-xs px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-sm">
+                                    <i data-lucide="video" class="w-4 h-4"></i> VÍDEO EXPLICATIVO INTERACTIVO
+                                </span>
+                                <span class="bg-indigo-800/80 text-indigo-200 text-xs px-2.5 py-1 rounded-lg border border-indigo-700 font-semibold">${mod.video.topic}</span>
+                            </div>
+                            <span class="text-xs font-bold text-amber-300 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/30 flex items-center gap-1">
+                                <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${mod.video.duration}
+                            </span>
+                        </div>
+                        
+                        <h3 class="font-extrabold text-lg text-white mb-1">${mod.video.title}</h3>
+                        <p class="text-xs text-indigo-200 mb-4 leading-relaxed">${mod.video.summary}</p>
+                        
+                        <!-- Pantalla del Reproductor de Vídeo Animado Directo -->
+                        <div class="video-viewport border border-indigo-700/80 shadow-2xl relative overflow-hidden flex flex-col justify-between p-4 md:p-6">
+                            <canvas id="video-canvas-element" class="absolute inset-0 w-full h-full object-cover z-0"></canvas>
+                            
+                            <!-- Superposición de Vídeo Interactivo -->
+                            <div class="relative z-10 flex items-center justify-between text-xs text-indigo-300 bg-indigo-950/80 backdrop-blur-md p-2 rounded-lg border border-indigo-800/80 transition-opacity duration-300" id="video-overlay-header">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                    <span class="font-bold text-indigo-100 uppercase tracking-wide" id="video-status-text">Vídeo Explicativo Listo</span>
+                                </div>
+                                <span class="font-mono text-amber-300 font-bold" id="video-timestamp">00:00 / 00:20</span>
+                            </div>
+
+                            <!-- Escena Central / Botón de Play Central (se oculta al reproducir) -->
+                            <div id="video-scene" class="relative z-10 flex flex-col items-center justify-center my-auto text-center transition-all duration-300">
+                                <button id="video-center-play-btn" onclick="toggleInteractiveVideo('${mod.video.type}')" class="group relative flex items-center justify-center w-20 h-20 bg-rose-600/90 hover:bg-rose-500 text-white rounded-full shadow-2xl backdrop-blur-sm transition-all transform hover:scale-110">
+                                    <i data-lucide="play" class="w-10 h-10 fill-white ml-1"></i>
+                                </button>
+                                <p id="video-center-hint" class="text-xs md:text-sm font-bold text-white mt-4 bg-slate-900/80 px-4 py-2 rounded-full border border-slate-700/80 shadow-lg transition-opacity duration-300">Presiona Play para reproducir el vídeo corto explicativo</p>
+                            </div>
+
+                            <!-- Barra de Controles de Vídeo -->
+                            <div class="relative z-10 mt-auto pt-3 space-y-3 bg-indigo-950/80 backdrop-blur-md p-3 rounded-xl border border-indigo-800/80">
+                                <div onclick="seekVideo(event)" class="w-full bg-indigo-950 h-2.5 rounded-full overflow-hidden border border-indigo-800 cursor-pointer relative">
+                                    <div id="video-progress" class="bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 h-full w-0 transition-all duration-200"></div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <button id="video-play-btn" onclick="toggleInteractiveVideo('${mod.video.type}')" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-extrabold rounded-lg shadow-md transition flex items-center space-x-2 text-xs">
+                                            <i data-lucide="play" class="w-4 h-4"></i>
+                                            <span>Reproducir Vídeo</span>
+                                        </button>
+                                        <button onclick="resetVideo('${mod.video.type}')" class="p-2 bg-indigo-900 hover:bg-indigo-800 text-indigo-200 rounded-lg border border-indigo-700 transition" title="Reiniciar Vídeo">
+                                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="text-xs font-semibold text-indigo-200 hidden sm:block" id="video-subtitle-indicator">
+                                        Subtítulos & Explicación Activa
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resumen y Puntos Clave del Vídeo -->
+                        <div class="mt-4 bg-indigo-900/60 p-4 rounded-xl border border-indigo-800/80">
+                            <span class="text-xs font-bold text-amber-300 uppercase tracking-wider block mb-2">Puntos Clave Explicados en el Vídeo:</span>
+                            <ul class="space-y-1.5">
+                                ${mod.video.visualGuide.map(item => `
+                                    <li class="flex items-start space-x-2 text-xs text-indigo-100">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                                        <span>${item}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Demostración Interactiva del Triángulo en Módulo Intro
+            if (mod.content && mod.content.interactiveDemo) {
+                html += renderPascalDemo();
+            }
+
+            // Renderizado Específico según tipo de Reto
+        if (mod.challengeType === 'pascal-fill') {
+            html += renderPascalFillChallenge(mod);
+        } else if (mod.challengeType === 'matching') {
+            html += renderMatchingChallenge(mod);
+        } else if (mod.challengeType === 'quiz-multiple') {
+            html += renderQuizChallenge(mod);
+        } else if (mod.challengeType === 'true-false') {
+            html += renderTFChallenge(mod);
+        } else if (mod.challengeType === 'final-mission') {
+            html += renderFinalMission(mod);
+        }
+
+        html += `</div>`;
+        container.innerHTML = html;
+        lucide.createIcons();
+        
+        // Renderizar frame inicial del canvas si existe vídeo
+        if (mod.video) {
+            setTimeout(() => drawVideoFrame(mod.video.type, 0), 50);
+        }
+    }
+
+    // --- DEMO DEL TRIÁNGULO DE PASCAL ---
+    function renderPascalDemo() {
+        return `
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                    <i data-lucide="triangle" class="w-5 h-5 text-indigo-600"></i>
+                    <span>Exploración Visual Interactiva: Las Primeras 5 Filas</span>
+                </h3>
+                <p class="text-xs text-slate-500">Pasa el cursor o toca cada casilla para resaltar las relaciones numéricas.</p>
+                <div class="flex flex-col items-center space-y-2 py-4 bg-slate-900 rounded-2xl text-white shadow-inner">
+                    <div class="flex justify-center space-x-2">
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500 font-bold text-slate-900 flex items-center justify-center text-sm shadow-md">1</span>
+                    </div>
+                    <div class="flex justify-center space-x-2">
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 font-bold text-white flex items-center justify-center text-sm shadow-md">1</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 font-bold text-white flex items-center justify-center text-sm shadow-md">1</span>
+                    </div>
+                    <div class="flex justify-center space-x-2">
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 font-bold text-white flex items-center justify-center text-sm shadow-md">1</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 font-extrabold text-slate-950 flex items-center justify-center text-sm shadow-md ring-2 ring-emerald-300">2</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 font-bold text-white flex items-center justify-center text-sm shadow-md">1</span>
+                    </div>
+                    <div class="flex justify-center space-x-2">
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 font-bold text-white flex items-center justify-center text-sm shadow-md">1</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 font-extrabold text-slate-950 flex items-center justify-center text-sm shadow-md ring-2 ring-emerald-300">3</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 font-extrabold text-slate-950 flex items-center justify-center text-sm shadow-md ring-2 ring-emerald-300">3</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 font-bold text-white flex items-center justify-center text-sm shadow-md">1</span>
+                    </div>
+                    <div class="flex justify-center space-x-2">
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 font-bold text-white flex items-center justify-center text-sm shadow-md">1</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 font-extrabold text-slate-950 flex items-center justify-center text-sm shadow-md ring-2 ring-emerald-300">4</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-400 font-extrabold text-slate-950 flex items-center justify-center text-sm shadow-md ring-2 ring-amber-200">6</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 font-extrabold text-slate-950 flex items-center justify-center text-sm shadow-md ring-2 ring-emerald-300">4</span>
+                        <span class="pascal-node w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 font-bold text-white flex items-center justify-center text-sm shadow-md">1</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- REPRODUCTOR AUDIOVISUAL CON CANVAS Y CONTROLADOR ANIMADO ---
+    function toggleInteractiveVideo(videoType) {
+        if (state.isVideoPlaying) {
+            stopInteractiveVideo();
+        } else {
+            startInteractiveVideo(videoType);
+        }
+    }
+
+    function startInteractiveVideo(videoType) {
+        state.isVideoPlaying = true;
+        const playBtn = document.getElementById('video-play-btn');
+        const centerPlayBtn = document.getElementById('video-center-play-btn');
+        const centerHint = document.getElementById('video-center-hint');
+        const statusText = document.getElementById('video-status-text');
+        
+        if (playBtn) {
+            playBtn.innerHTML = `<i data-lucide="pause" class="w-4 h-4"></i><span>Pausar Vídeo</span>`;
+            playBtn.classList.replace('bg-rose-600', 'bg-amber-600');
+            playBtn.classList.replace('hover:bg-rose-500', 'hover:bg-amber-500');
+            lucide.createIcons();
+        }
+
+        // Ocultar el botón central y la instrucción al reproducir
+        if (centerPlayBtn) centerPlayBtn.classList.add('opacity-0', 'pointer-events-none');
+        if (centerHint) centerHint.classList.add('opacity-0');
+        
+        if (statusText) statusText.innerText = "Reproduciendo Vídeo Explicativo...";
+
+        let step = state.videoStep || 0;
+        const maxSteps = 20;
+
+        state.videoTimer = setInterval(() => {
+            step++;
+            state.videoStep = step;
+            
+            const progress = (step / maxSteps) * 100;
+            const progressBar = document.getElementById('video-progress');
+            const timeStamp = document.getElementById('video-timestamp');
+
+            if (progressBar) progressBar.style.width = `${progress}%`;
+            if (timeStamp) {
+                const currentSec = String(step).padStart(2, '0');
+                timeStamp.innerText = `00:${currentSec} / 00:20`;
+            }
+
+            drawVideoFrame(videoType, step);
+
+            if (step >= maxSteps) {
+                stopInteractiveVideo();
+                state.videoStep = 0;
+            }
+        }, 1000);
+    }
+
+    function stopInteractiveVideo() {
+        state.isVideoPlaying = false;
+        if (state.videoTimer) {
+            clearInterval(state.videoTimer);
+            state.videoTimer = null;
+        }
+        const playBtn = document.getElementById('video-play-btn');
+        const centerPlayBtn = document.getElementById('video-center-play-btn');
+        const centerHint = document.getElementById('video-center-hint');
+        const statusText = document.getElementById('video-status-text');
+        
+        if (playBtn) {
+            playBtn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i><span>Reproducir Vídeo</span>`;
+            playBtn.classList.replace('bg-amber-600', 'bg-rose-600');
+            playBtn.classList.replace('hover:bg-amber-500', 'hover:bg-rose-500');
+            lucide.createIcons();
+        }
+
+        // Volver a mostrar el botón central y la leyenda al pausar o terminar
+        if (centerPlayBtn) centerPlayBtn.classList.remove('opacity-0', 'pointer-events-none');
+        if (centerHint) centerHint.classList.remove('opacity-0');
+
+        if (statusText) statusText.innerText = "Vídeo Pausado / Finalizado";
+    }
+
+    function resetVideo(videoType) {
+        stopInteractiveVideo();
+        state.videoStep = 0;
+        const progressBar = document.getElementById('video-progress');
+        const timeStamp = document.getElementById('video-timestamp');
+        if (progressBar) progressBar.style.width = `0%`;
+        if (timeStamp) timeStamp.innerText = `00:00 / 00:20`;
+        drawVideoFrame(videoType, 0);
+    }
+
+    function seekVideo(e) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const width = rect.width;
+        const percentage = clickX / width;
+        const step = Math.floor(percentage * 20);
+        
+        state.videoStep = step;
+        const mod = modules[state.currentModuleIndex];
+        drawVideoFrame(mod.video ? mod.video.type : 'pascal-build', step);
+        
+        const progressBar = document.getElementById('video-progress');
+        const timeStamp = document.getElementById('video-timestamp');
+        if (progressBar) progressBar.style.width = `${percentage * 100}%`;
+        if (timeStamp) timeStamp.innerText = `00:${String(step).padStart(2, '0')} / 00:20`;
+    }
+
+    function drawVideoFrame(type, step) {
+        const canvas = document.getElementById('video-canvas-element');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.parentElement.clientWidth || 640;
+        canvas.height = canvas.parentElement.clientHeight || 360;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Fondo Gradiente
+        const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        bgGradient.addColorStop(0, '#0f172a');
+        bgGradient.addColorStop(1, '#1e1b4b');
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Rejilla decorativa
+        ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 40) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        }
+
+        // Animación dinámica según el módulo
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+
+        if (type === 'pascal-build') {
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 20px "Plus Jakarta Sans"';
+            ctx.fillText("Construcción del Triángulo de Pascal", centerX, 40);
+
+            const rows = [
+                [1],
+                [1, 1],
+                [1, 2, 1],
+                [1, 3, 3, 1]
+            ];
+            
+            const visibleRows = Math.min(Math.floor(step / 4) + 1, 4);
+            
+            for (let r = 0; r < visibleRows; r++) {
+                const numCount = rows[r].length;
+                const startX = centerX - ((numCount - 1) * 30);
+                const y = 85 + (r * 45);
+
+                for (let c = 0; c < numCount; c++) {
+                    const x = startX + (c * 60);
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, 20, 0, Math.PI * 2);
+                    ctx.fillStyle = (c === 0 || c === numCount - 1) ? '#6366f1' : '#10b981';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 14px "Plus Jakarta Sans"';
+                    ctx.fillText(rows[r][c].toString(), x, y + 5);
+                }
+            }
+        } else if (type === 'sum-rule') {
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 20px "Plus Jakarta Sans"';
+            ctx.fillText("Regla de la Suma: Casilla = A + B", centerX, 40);
+
+            // Casilla Izquierda
+            ctx.beginPath(); ctx.arc(centerX - 40, centerY - 40, 24, 0, Math.PI*2);
+            ctx.fillStyle = '#6366f1'; ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.fillText("3", centerX - 40, centerY - 33);
+
+            // Casilla Derecha
+            ctx.beginPath(); ctx.arc(centerX + 40, centerY - 40, 24, 0, Math.PI*2);
+            ctx.fillStyle = '#6366f1'; ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.fillText("3", centerX + 40, centerY - 33);
+
+            // Flechas de Suma
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(centerX - 30, centerY - 20); ctx.lineTo(centerX - 10, centerY + 20); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(centerX + 30, centerY - 20); ctx.lineTo(centerX + 10, centerY + 20); ctx.stroke();
+
+            // Resultado
+            ctx.beginPath(); ctx.arc(centerX, centerY + 45, 28, 0, Math.PI*2);
+            ctx.fillStyle = '#10b981'; ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 18px "Plus Jakarta Sans"';
+            ctx.fillText(step > 3 ? "6" : "?", centerX, centerY + 52);
+
+            ctx.fillStyle = '#fbbf24'; ctx.font = '14px "Plus Jakarta Sans"';
+            ctx.fillText("¡Sumas casillas adyacentes de la fila superior!", centerX, canvas.height - 25);
+
+        } else if (type === 'diagonals') {
+            ctx.fillStyle = '#34d399';
+            ctx.font = 'bold 20px "Plus Jakarta Sans"';
+            ctx.fillText("Patrones Ocultos: Diagonales & Potencias de 2", centerX, 35);
+
+            // Explicación dinámica progresiva según el segundo actual
+            const subPhase = Math.floor((step / 20) * 3);
+            
+            if (subPhase === 0) {
+                ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 16px "Plus Jakarta Sans"';
+                ctx.fillText("Diagonal 2: Números Naturales (1, 2, 3, 4, 5...)", centerX, 70);
+
+                const nums = [1, 2, 3, 4, 5];
+                nums.forEach((n, i) => {
+                    const x = centerX - 80 + (i * 40);
+                    const y = 110 + (i * 30);
+                    ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI*2);
+                    ctx.fillStyle = (step >= i*3) ? '#f59e0b' : '#334155'; ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px "Plus Jakarta Sans"'; ctx.fillText(n, x, y + 4);
+                });
+            } else if (subPhase === 1) {
+                ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 16px "Plus Jakarta Sans"';
+                ctx.fillText("Diagonal 3: Números Triangulares (1, 3, 6, 10...)", centerX, 70);
+
+                const triang = [1, 3, 6, 10];
+                triang.forEach((n, i) => {
+                    const x = centerX - 60 + (i * 45);
+                    const y = 110 + (i * 30);
+                    ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI*2);
+                    ctx.fillStyle = '#0284c7'; ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px "Plus Jakarta Sans"'; ctx.fillText(n, x, y + 4);
+                });
+            } else {
+                ctx.fillStyle = '#a855f7'; ctx.font = 'bold 16px "Plus Jakarta Sans"';
+                ctx.fillText("Suma de cada Fila = Potencias de 2 (2ⁿ)", centerX, 70);
+
+                const sums = ['Fila 0: 1 (2⁰)', 'Fila 1: 1+1 = 2 (2¹)', 'Fila 2: 1+2+1 = 4 (2²)', 'Fila 3: 1+3+3+1 = 8 (2³)', 'Fila 4: 1+4+6+4+1 = 16 (2⁴)'];
+                sums.forEach((s, i) => {
+                    ctx.fillStyle = '#e9d5ff'; ctx.font = '13px "Plus Jakarta Sans"';
+                    ctx.fillText(s, centerX, 105 + (i * 26));
+                });
+            }
+
+        } else if (type === 'real-life') {
+            ctx.fillStyle = '#f43f5e';
+            ctx.font = 'bold 20px "Plus Jakarta Sans"';
+            ctx.fillText("Aplicaciones Prácticas: Combinaciones en la Vida", centerX, 35);
+
+            ctx.fillStyle = '#cbd5e1'; ctx.font = '14px "Plus Jakarta Sans"';
+            ctx.fillText("Ejemplo: ¿De cuántas formas combinamos 2 toppings entre 4?", centerX, 65);
+
+            // Representación visual de combinaciones
+            const toppings = ['🍫 Choco', '🍓 Fresa', '🥜 Maní', '🍬 Dulce'];
+            toppings.forEach((t, i) => {
+                const x = centerX - 150 + (i * 100);
+                ctx.fillStyle = '#334155';
+                ctx.fillRect(x - 40, 95, 80, 30);
+                ctx.strokeStyle = '#e2e8f0'; ctx.strokeRect(x - 40, 95, 80, 30);
+                ctx.fillStyle = '#ffffff'; ctx.font = '12px "Plus Jakarta Sans"';
+                ctx.fillText(t, x, 115);
+            });
+
+            ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 16px "Plus Jakarta Sans"';
+            ctx.fillText("Fila 4 del Triángulo: [1, 4, 6, 4, 1]", centerX, 160);
+
+            ctx.fillStyle = '#10b981'; ctx.font = 'bold 18px "Plus Jakarta Sans"';
+            ctx.fillText("Respuesta: ₆ Combinaciones Posibles", centerX, 200);
+
+            ctx.fillStyle = '#94a3b8'; ctx.font = '12px "Plus Jakarta Sans"';
+            ctx.fillText("¡El triángulo nos ahorra contar combinaciones una por una!", centerX, 235);
+
+        } else if (type === 'algebra') {
+            ctx.fillStyle = '#a855f7';
+            ctx.font = 'bold 20px "Plus Jakarta Sans"';
+            ctx.fillText("Binomio de Newton & Razonamiento Algebraico", centerX, 35);
+
+            ctx.fillStyle = '#cbd5e1'; ctx.font = '14px "Plus Jakarta Sans"';
+            ctx.fillText("Los números del triángulo son los Coeficientes Algebraicos", centerX, 65);
+
+            ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 18px "Plus Jakarta Sans"';
+            ctx.fillText("(a + b)² = 1a² + 2ab + 1b²  ➜ Coeficientes: [1, 2, 1]", centerX, 110);
+
+            ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 18px "Plus Jakarta Sans"';
+            ctx.fillText("(a + b)³ = 1a³ + 3a²b + 3ab² + 1b³  ➜ Coeficientes: [1, 3, 3, 1]", centerX, 155);
+
+            ctx.fillStyle = '#10b981'; ctx.font = 'bold 14px "Plus Jakarta Sans"';
+            ctx.fillText("Demostración: Cada exponente 'n' utiliza exactamente la Fila 'n'.", centerX, 205);
+
+        } else if (type === 'final-review') {
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 20px "Plus Jakarta Sans"';
+            ctx.fillText("Estrategias de Evaluación: Misión Final", centerX, 35);
+
+            const tips = [
+                "1. Fila 6 del Triángulo: [1, 6, 15, 20, 15, 6, 1]",
+                "2. El elemento central de la Fila 6 es 20.",
+                "3. Regla del Doble: Suma Fila 5 (32) x 2 = Suma Fila 6 (64).",
+                "4. Justifica siempre tus respuestas con las leyes vistas."
+            ];
+
+            tips.forEach((tip, idx) => {
+                const y = 80 + (idx * 38);
+                ctx.fillStyle = (idx % 2 === 0) ? '#e0e7ff' : '#fef3c7';
+                ctx.font = 'bold 14px "Plus Jakarta Sans"';
+                ctx.fillText(tip, centerX, y);
+            });
+        }
+    }
+
+    // --- RENDERS DE RETOS GAMIFICADOS ---
+    function renderPascalFillChallenge(mod) {
+        return `
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                        <i data-lucide="edit-3" class="w-5 h-5 text-indigo-600"></i>
+                        <span>Reto 1: Completa los Números Faltantes</span>
+                    </h3>
+                    <span class="text-xs bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold">+100 Pts</span>
+                </div>
+                
+                <p class="text-sm text-slate-600">${mod.questions[0].instructions}</p>
+                
+                <div class="flex flex-col items-center space-y-3 py-6 bg-slate-950 rounded-2xl border border-slate-800">
+                    <div class="flex justify-center space-x-2"><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">1</span></div>
+                    <div class="flex justify-center space-x-2"><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">1</span><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">1</span></div>
+                    <div class="flex justify-center space-x-2"><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">1</span><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">2</span><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">1</span></div>
+                    <div class="flex justify-center space-x-2"><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">1</span><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">3</span><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">3</span><span class="w-8 h-8 rounded-lg bg-slate-700 text-white font-bold flex items-center justify-center text-xs">1</span></div>
+                    
+                    <!-- Fila Interactiva -->
+                    <div class="flex justify-center space-x-2 pt-2">
+                        <span class="w-10 h-10 rounded-xl bg-slate-700 text-white font-bold flex items-center justify-center text-sm shadow">1</span>
+                        <input type="number" id="input-p1" class="w-12 h-10 rounded-xl bg-indigo-900 border-2 border-indigo-400 text-amber-300 font-extrabold text-center text-base focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="?">
+                        <input type="number" id="input-p2" class="w-12 h-10 rounded-xl bg-indigo-900 border-2 border-indigo-400 text-amber-300 font-extrabold text-center text-base focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="?">
+                        <input type="number" id="input-p3" class="w-12 h-10 rounded-xl bg-indigo-900 border-2 border-indigo-400 text-amber-300 font-extrabold text-center text-base focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="?">
+                        <span class="w-10 h-10 rounded-xl bg-slate-700 text-white font-bold flex items-center justify-center text-sm shadow">1</span>
+                    </div>
+                </div>
+
+                <button onclick="checkPascalFill()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition">
+                    Verificar Respuestas
+                </button>
+            </div>
+        `;
+    }
+
+    function checkPascalFill() {
+        const p1 = parseInt(document.getElementById('input-p1').value);
+        const p2 = parseInt(document.getElementById('input-p2').value);
+        const p3 = parseInt(document.getElementById('input-p3').value);
+
+        if (p1 === 4 && p2 === 6 && p3 === 4) {
+            completeChallenge('reto1', 100, "¡Excelente! Has sumado correctamente las casillas superiores (1+3=4, 3+3=6, 3+1=4). Continúa con el siguiente reto.");
+        } else {
+            showFeedbackModal(false, "Inténtalo Nuevamente", "Observa los dos números ubicados encima de cada espacio vacío y analiza qué operación de suma debes realizar.");
+        }
+    }
+
+    function renderMatchingChallenge(mod) {
+        return `
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-lg font-bold text-slate-800">Reto 2: Relaciona las Columnas</h3>
+                    <span class="text-xs bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold">+100 Pts</span>
+                </div>
+                <p class="text-sm text-slate-600">Selecciona para cada concepto de la izquierda su correspondencia exacta a la derecha.</p>
+                
+                <div class="space-y-4">
+                    ${mod.matchingPairs.map(pair => `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 items-center">
+                            <span class="text-xs font-bold text-slate-700">${pair.left}</span>
+                            <select id="match-${pair.id}" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500">
+                                <option value="">-- Seleccionar Opción --</option>
+                                ${mod.matchingPairs.map(p => `<option value="${p.right}">${p.right}</option>`).join('')}
+                            </select>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button onclick="checkMatching()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition">
+                    Comprobar Emparejamientos
+                </button>
+            </div>
+        `;
+    }
+
+    function checkMatching() {
+        const mod = modules[2];
+        let correct = true;
+
+        mod.matchingPairs.forEach(pair => {
+            const val = document.getElementById(`match-${pair.id}`).value;
+            if (val !== pair.right) correct = false;
+        });
+
+        if (correct) {
+            completeChallenge('reto2', 100, "¡Fantástico! Reconociste todas las relaciones numéricas, diagonales y potencias de 2 en el triángulo.");
+        } else {
+            showFeedbackModal(false, "Revisa tus Emparejamientos", "Recuerda: La primera diagonal son 1s, la segunda son Números Naturales, la tercera Números Triangulares y la suma de la fila n es 2ⁿ.");
+        }
+    }
+
+    function renderQuizChallenge(mod) {
+        return `
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-lg font-bold text-slate-800">Reto 3: Situaciones Problemáticas Cotidianas</h3>
+                    <span class="text-xs bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold">+100 Pts</span>
+                </div>
+
+                ${mod.quizQuestions.map((q, qIdx) => `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                        <p class="text-sm font-bold text-slate-800">${qIdx + 1}. ${q.question}</p>
+                        <div class="space-y-2">
+                            ${q.options.map((opt, oIdx) => `
+                                <label class="flex items-center space-x-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-indigo-50/50 transition">
+                                    <input type="radio" name="quiz-${qIdx}" value="${oIdx}" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-xs font-medium text-slate-700">${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+
+                <button onclick="checkQuiz()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition">
+                    Enviar Cuestionario
+                </button>
+            </div>
+        `;
+    }
+
+    function checkQuiz() {
+        const mod = modules[3];
+        let correctCount = 0;
+
+        mod.quizQuestions.forEach((q, qIdx) => {
+            const selected = document.querySelector(`input[name="quiz-${qIdx}"]:checked`);
+            if (selected && parseInt(selected.value) === q.correctIndex) {
+                correctCount++;
+            }
+        });
+
+        if (correctCount === mod.quizQuestions.length) {
+            completeChallenge('reto3', 100, "¡Excelente resolución! Has aplicado de manera precisa las combinaciones del triángulo a situaciones de la vida real.");
+        } else {
+            showFeedbackModal(false, "Revisa tus opciones", "Analiza atentamente cada problema planteado y selecciona la opción respaldada por las propiedades del triángulo.");
+        }
+    }
+
+    function renderTFChallenge(mod) {
+        return `
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-lg font-bold text-slate-800">Reto 4: Argumentación - ¿Verdadero o Falso?</h3>
+                    <span class="text-xs bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold">+100 Pts</span>
+                </div>
+
+                <div class="space-y-4">
+                    ${mod.tfQuestions.map((tf, idx) => `
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                            <p class="text-xs font-bold text-slate-800">${idx + 1}. "${tf.statement}"</p>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="tf-${idx}" value="true" class="w-4 h-4 text-emerald-600">
+                                    <span class="text-xs font-bold text-emerald-700">Verdadero</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="tf-${idx}" value="false" class="w-4 h-4 text-rose-600">
+                                    <span class="text-xs font-bold text-rose-700">Falso</span>
+                                </label>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button onclick="checkTF()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition">
+                    Validar Argumentos
+                </button>
+            </div>
+        `;
+    }
+
+    function checkTF() {
+        const mod = modules[4];
+        let correct = true;
+
+        mod.tfQuestions.forEach((tf, idx) => {
+            const sel = document.querySelector(`input[name="tf-${idx}"]:checked`);
+            if (!sel || (sel.value === 'true') !== tf.isTrue) {
+                correct = false;
+            }
+        });
+
+        if (correct) {
+            completeChallenge('reto4', 100, "¡Gran nivel de razonamiento! Has verificado y argumentado correctamente cada propiedad lógica y algebraica.");
+        } else {
+            showFeedbackModal(false, "Revisa tus Razonamientos", "Recuerda verificar bien las propiedades algebraicas, como la expansión de binomios (a+b)ⁿ y la presencia de números pares e impares.");
+        }
+    }
+
+    function renderFinalMission(mod) {
+        return `
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                        <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
+                        <span>Evaluación Final: Misión del Triángulo de Pascal</span>
+                    </h3>
+                    <span class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-bold">+200 Pts</span>
+                </div>
+
+                <div class="space-y-4">
+                    ${mod.questions.map((q, idx) => `
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                            <p class="text-xs font-bold text-slate-800">${idx + 1}. ${q.q}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                ${q.options.map((opt, oIdx) => `
+                                    <label class="flex items-center space-x-2 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-indigo-50/50">
+                                        <input type="radio" name="final-${idx}" value="${oIdx}" class="w-4 h-4 text-indigo-600">
+                                        <span class="text-xs font-medium text-slate-700">${opt}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button onclick="checkFinalMission()" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold rounded-xl shadow-lg transition">
+                    Completar Misión Final
+                </button>
+            </div>
+        `;
+    }
+
+    function checkFinalMission() {
+        const mod = modules[5];
+        let correct = true;
+
+        mod.questions.forEach((q, idx) => {
+            const sel = document.querySelector(`input[name="final-${idx}"]:checked`);
+            if (!sel || parseInt(sel.value) !== q.correct) {
+                correct = false;
+            }
+        });
+
+        if (correct) {
+            completeChallenge('reto5', 200, "¡Felicitaciones! Has completado exitosamente la Misión Final de 'Matemáticas para la Vida'. Te has certificado como Maestro de los Patrones Matemáticos.");
+        } else {
+            showFeedbackModal(false, "Misión Incompleta", "Repasa los datos y patrones. Recuerda que la Fila 6 es (1, 6, 15, 20, 15, 6, 1) y que cada fila suma el doble de la anterior.");
+        }
+    }
+
+    // Modal de Feedback y Gestión de Puntos
+    function completeChallenge(modId, points, successMsg) {
+        if (!state.completedModules.has(modId)) {
+            state.completedModules.add(modId);
+            state.score += points;
+            playSound('correct');
+            playSound('badge');
+        } else {
+            playSound('correct');
+        }
+
+        updateUIStats();
+        renderSidebar();
+        showFeedbackModal(true, "¡Reto Superado!", successMsg);
+    }
+
+    function showFeedbackModal(isSuccess, title, message) {
+        const modal = document.getElementById('feedback-modal');
+        const iconBg = document.getElementById('modal-icon-bg');
+        const icon = document.getElementById('modal-icon');
+        const titleEl = document.getElementById('modal-title');
+        const msgEl = document.getElementById('modal-message');
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+
+        if (isSuccess) {
+            iconBg.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 bg-emerald-100 text-emerald-600";
+            icon.setAttribute('data-lucide', 'award');
+        } else {
+            iconBg.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 bg-rose-100 text-rose-600";
+            icon.setAttribute('data-lucide', 'alert-circle');
+            playSound('incorrect');
+        }
+
+        lucide.createIcons();
+        modal.classList.remove('hidden');
+    }
+
+    function closeFeedbackModal() {
+        document.getElementById('feedback-modal').classList.add('hidden');
+    }
+
+    function updateUIStats() {
+        document.getElementById('score-display').innerText = `${state.score} Pts`;
+        document.getElementById('badges-count').innerText = `${state.completedModules.size}/5 Retos`;
+        
+        const percent = Math.round((state.completedModules.size / 5) * 100);
+        document.getElementById('progress-percent').innerText = `${percent}%`;
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+    }
+    </script>
+</body>
+</html>
